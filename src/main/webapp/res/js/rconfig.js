@@ -3,16 +3,17 @@
  * Created by eric on 17-2-12.
  */
 require.config({
-    baseUrl: "/res/js/3rd",
+    baseUrl: "/res/js",
     paths: {
-        "jquery" : "jquery/jquery-3.1.1.min",
-        "backbone" : "backbone/backbone-min",
-        "underscore" : "underscore/underscore-min",
-        "bootstrap" : "bootstrap-3.3.7-dist/js/bootstrap.min"
+        "jquery" : "3rd/jquery/jquery-3.1.1.min",
+        "backbone" : "3rd/backbone/backbone-min",
+        "underscore" : "3rd/underscore/underscore-min",
+        "bootstrap" : "3rd/bootstrap-3.3.7-dist/js/bootstrap.min",
+        "eposition" : "eframework/position"
     },
     map: {
         '*': {
-            'css': 'require/css'
+            'css': '3rd/require/css'
         }
     },
     shim: {
@@ -24,7 +25,10 @@ require.config({
             exports: '_'
         },
         'bootstrap' : {
-            deps:['css!bootstrap-3.3.7-dist/css/bootstrap.min', 'jquery']
+            deps:['css!3rd/bootstrap-3.3.7-dist/css/bootstrap.min', 'jquery']
+        },
+        "eposition" : {
+            deps:['jquery']
         }
     }
 });
