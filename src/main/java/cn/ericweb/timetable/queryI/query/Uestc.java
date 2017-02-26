@@ -1,8 +1,7 @@
 package cn.ericweb.timetable.queryI.query;
 
-import cn.ericweb.timetable.domain.Classtable;
-import cn.ericweb.timetable.domain.QueryInfo;
-import cn.ericweb.timetable.domain.QueryLoginResult;
+import cn.ericweb.timetable.domain.*;
+import cn.ericweb.timetable.domain.Class;
 import cn.ericweb.timetable.queryI.QueryI;
 import com.google.gson.Gson;
 import org.apache.commons.httpclient.Cookie;
@@ -18,6 +17,7 @@ import org.jsoup.nodes.Element;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -35,6 +35,12 @@ public class Uestc implements QueryI, Serializable {
     final static String URL_CLASSTABLE_SEMESTER_CONFIG = "http://eams.uestc.edu.cn/eams/dataQuery.action";
     final static String URL_CLASSTABLE = "http://eams.uestc.edu.cn/eams/courseTableForStd!courseTable.action";
 
+    final static int COUNT_OF_CLASSES_PER_DAY = 12;
+    final static int START_HOUR = 8;
+    final static int START_MINUTE = 30;
+    final static int MINS_PER_CLASS = 45;
+    final static ArrayList<Integer> INTERVAL_PER_COURSE = new ArrayList<Integer>(Arrays.asList(5, 15, 5, 155, 5, 15, 5, 95, 5, 5, 5));
+
     private QueryInfo loginInfo;
 
     private HttpClient client;
@@ -45,6 +51,7 @@ public class Uestc implements QueryI, Serializable {
 
     private UestcSemesterCfg semesterCfg;
     private String classtable_semester_id;
+    private Classtable classtable;
 
     private HashMap<String, String> hiddenInfo;
 
@@ -194,16 +201,73 @@ public class Uestc implements QueryI, Serializable {
 
                 status = this.client.executeMethod(classtablePost);
 
-                System.out.println(classtablePost.getResponseBodyAsString());
+                this.classtable = new Classtable(Uestc.COUNT_OF_CLASSES_PER_DAY, Uestc.START_HOUR, Uestc.START_MINUTE, Uestc.MINS_PER_CLASS, Uestc.INTERVAL_PER_COURSE);
+                // parse classtable
+                String classtableHtml = classtablePost.getResponseBodyAsString();
+
+                String[] subjectInfoRows = classtableHtml.split("activity\\s+=\\s+new\\s+TaskActivity");
+
+                Pattern subjectInfoPattern = Pattern.compile("\\(\"([0-9,]+)\",\"([^\"]+)\",\"([^\"]+)\",\"([^\"\\(]+)[^\")]+\\)\",\"[^\"]*\",\"([^\"]*)\",\"([01]*)\"\\);");
+                Pattern timeOfClassPattern = Pattern.compile("index =(\\d*)\\*unitCount\\+(\\d*)");
+
+                for (String info : subjectInfoRows) {
+                    Matcher subjectInfo = subjectInfoPattern.matcher(info);
+                    if (true == subjectInfo.find()) {
+                        String teacherName = subjectInfo.group(2);
+                        String subjectId = subjectInfo.group(3);
+                        String subjectTitle = subjectInfo.group(4);
+                        String subjectAddress = subjectInfo.group(5);
+                        String timeArrange = subjectInfo.group(6);
+
+                        Teacher teacher = new Teacher();
+                        teacher.setName(teacherName);
+
+                        Subject subject = new Subject();
+                        subject.setId(subjectId);
+                        subject.setTeacher(teacher);
+                        subject.setTitle(subjectTitle);
+                        subject.setShortTitle(subjectTitle);
+
+                        this.classtable.pushSubject(subject);
+
+                        int day;
+                        day = 0;
+                        int classIndex;
+                        classIndex = 0;
+
+                        Matcher timeOfClassMatcher = timeOfClassPattern.matcher(info);
+                        while (timeOfClassMatcher.find()) {
+
+                            day = Integer.parseInt(timeOfClassMatcher.group(1));
+                            classIndex = Integer.parseInt(timeOfClassMatcher.group(2));
+
+                            Class _class = new Class(subject);
+                            _class.setClass(true);
+                            _class.setExistedWeek(timeArrange);
+                            _class.setLocation(subjectAddress);
+                            _class.setWhichWeekday(day);
+                            _class.setStartClassIndex(classIndex);
+                            _class.setEndClassIndex(classIndex);
+                            _class.setTitle(_class.subject2Title());
+
+                            this.classtable.pushActivities(_class);
+                        }
+                    }
+                }
+                this.classtable.fixClasses();
             } catch (HttpException e) {
                 this.result.setStatus(QueryLoginResult.ERROR_UNKNOWN);
                 this.isGood = false;
             } catch (IOException e) {
                 this.result.setStatus(QueryLoginResult.ERROR_SCHOOL_SERVICE);
                 this.isGood = false;
+            } finally {
+                classtableIDPost.releaseConnection();
+                classtablePost.releaseConnection();
+                classtableSemesterCfgPost.releaseConnection();
             }
         }
-        return null;
+        return this.classtable;
     }
 
     public Cookie[] getCookies() {

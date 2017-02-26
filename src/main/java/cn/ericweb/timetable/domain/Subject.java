@@ -12,6 +12,32 @@ public class Subject {
     private Teacher teacher;
     private ExamInfo examInfo;
 
+    @Override
+    public String toString() {
+        return "Subject{" +
+                "id='" + id + '\'' +
+                ", title='" + title + '\'' +
+                ", shortTitle='" + shortTitle + '\'' +
+                ", teacher=" + teacher +
+                ", examInfo=" + examInfo +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Subject subject = (Subject) o;
+
+        return id != null ? id.equals(subject.id) : subject.id == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
+
     public String getId() {
         return id;
     }

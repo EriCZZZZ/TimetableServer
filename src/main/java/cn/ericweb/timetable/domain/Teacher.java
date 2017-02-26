@@ -9,6 +9,21 @@ public class Teacher {
     private String phone;
     private String email;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Teacher teacher = (Teacher) o;
+
+        return name != null ? name.equals(teacher.name) : teacher.name == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return name != null ? name.hashCode() : 0;
+    }
+
     public String getName() {
         return name;
     }

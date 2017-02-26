@@ -12,5 +12,15 @@
 </head>
 <body>
     <h1>Come soon.</h1>
+    <div>
+        <form action="/timetable/json">
+            <input type="text" name="id"/>
+            <input type="password" name="pwd"/>
+            <input type="text" name="checkcode"/>
+            <input type="text" name="startYear"/>
+            <input type="text" name="indexSemester"/>
+            <input type="submit" value="submit">
+        </form>
+    </div>
 </body>
 </html>
