@@ -3,7 +3,6 @@ package cn.ericweb.timetable.domain;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.sql.Time;
 import java.util.Calendar;
 import java.util.LinkedList;
 
@@ -30,7 +29,7 @@ public class Classtable implements Serializable {
         this.sessionStartDate = Calendar.getInstance().getTime();
         this.numberOfClassPerDay = _numberOfClassPerDay;
 
-        this.classStartTime = new Time(_startHour, _startMin, 0);
+        this.classStartTime = new Time(_startHour, _startMin);
         this.minutesPerClass = _minsPerClass;
         this.intervals = _intervals;
     }

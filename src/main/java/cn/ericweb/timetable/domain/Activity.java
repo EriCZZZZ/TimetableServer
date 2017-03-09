@@ -1,5 +1,7 @@
 package cn.ericweb.timetable.domain;
 
+import cn.ericweb.timetable.utils.StringUtils;
+
 /**
  * 展现于时间表上的所有物体的基类
  * Created by eric on 17-2-21.
@@ -31,9 +33,11 @@ public class Activity {
         if (whichWeekday != activity.whichWeekday) return false;
         if (startClassIndex != activity.startClassIndex) return false;
         if (endClassIndex != activity.endClassIndex) return false;
-        if (subject != null ? !subject.equals(activity.subject) : activity.subject != null) return false;
+        if (subject != null ? !subject.equals(activity.subject) : activity.subject != null)
+            return false;
         if (title != null ? !title.equals(activity.title) : activity.title != null) return false;
-        if (location != null ? !location.equals(activity.location) : activity.location != null) return false;
+        if (location != null ? !location.equals(activity.location) : activity.location != null)
+            return false;
         return existedWeek != null ? existedWeek.equals(activity.existedWeek) : activity.existedWeek == null;
     }
 
@@ -144,5 +148,13 @@ public class Activity {
 
     public void setColorBg(Color colorBg) {
         this.colorBg = colorBg;
+    }
+
+    public String getShowingString() {
+        if(StringUtils.isStringEmpty(this.getLocation())) {
+            return this.getTitle();
+        } else {
+            return this.getTitle() + "@" + this.getLocation();
+        }
     }
 }

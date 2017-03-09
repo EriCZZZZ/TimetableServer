@@ -248,7 +248,7 @@ public class Uestc implements QueryI, Serializable {
                             _class.setWhichWeekday(day);
                             _class.setStartClassIndex(classIndex);
                             _class.setEndClassIndex(classIndex);
-                            _class.setTitle(_class.subject2Title());
+                            _class.setTitle(_class.getSubject().getShortTitle());
 
                             this.classtable.pushActivities(_class);
                         }
